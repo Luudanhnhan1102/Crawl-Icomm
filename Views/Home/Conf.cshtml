@@ -1,0 +1,203 @@
+﻿@{
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+
+<h3>Customer Report</h3>
+<div class="row" style="margin-bottom:10px"><button type="button" id="create" class="btn btn-primary">Create</button></div>
+<div class="span12">
+    <table class="table table-hover" id="datatab">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Domain</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+            <tr>
+                <th>ID</th>
+                <th>Domain</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<!-- Modal -->
+<div class="modal fade " tabindex="-1" id="myModal" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content h-100">
+            <div class="modal-header">
+                <h4 class="modal-title">Config detail</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid justify-content-center align-items-center">
+                    <form id="form" class="form-horizontal">
+                        <input class="form-control" id="Id" name="Id" type="hidden">
+                        <div class="row">
+                            <label for="Domain1" class="control-label col-md-3">Domain</label>
+                            <input class="form-control col-md-9 ml-auto" id="Domain1" name="Domain1" type="text">
+                        </div>
+                        <div class="row">
+                            <label for="Type" class="control-label col-md-3">Type</label>
+                            <input class="form-control col-md-9 ml-auto" id="Type" name="Type" type="number">
+                        </div>
+                        <div class="row">
+                            <label for="Content" class="control-label col-md-3">Content</label>
+                            <textarea class="form-control col-md-9 ml-auto" id="Content" name="Content" rows="7" type="text"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="createtmp" class="btn btn-primary mr-auto">Create</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var data;
+    var oTable;
+    // Khởi tạo data table phân trang từ sever side
+    $(document).ready(function () {
+        oTable = $('#datatab').on('xhr.dt', function (e, settings, json) {
+            data = json.data;
+            // Note no return - manipulate the data directly in the JSON object.
+        }).DataTable({
+            "serverSide": true,
+            "ajax": {
+                "type": "POST",
+                "url": '../api/data',
+                "contentType": 'application/json; charset=utf-8',
+                'data': function (data) {
+                    return JSON.stringify(data);
+                }
+            },
+            "processing": true,
+            "paging": true,
+            "columns": [
+                { "data": "Id" },
+                { "data": "Domain1"},
+                { "data": "Type" },
+                {
+                    "data": "Action",
+                    "defaultContent": "<button type='button' class='btn btn-danger' onclick='deleteColum(this);'>Delete</button>",
+                    "width": "10%"
+                }
+            ],
+            "order": [0, "desc"]
+        });
+
+        // Mở modal thêm phần tử
+        $("#create").click(function () {
+            $("#form :input").val("");
+            $(".modal-footer #createtmp").html("Create");
+            $(".modal-footer #createtmp").attr("onclick","createElemet();");
+            //$(".modal-footer").children().remove("#createtmp");
+            //$(".modal-footer").children().remove("#save");
+            //$(".modal-footer").prepend("<button type=\"button\" id=\"createtmp\" class=\"btn btn-primary mr-auto\">Create</button>");
+            $("#myModal").modal();
+
+            //$("#createtmp").click(function () {
+            //    $.ajax({
+            //        type: "PUT",
+            //        url: "../api/Config",
+            //        data: $("#form").serialize(),
+            //        success: function (data) {
+            //            if (data == true) {
+            //                alert("Add sucess!");
+            //                $("#myModal").modal('toggle');
+            //                oTable.ajax.reload();
+            //            } else
+            //                alert("Add error!");
+            //        }, error: function () {
+            //            alert("Add error!");
+            //        }
+            //    });
+            //});
+        });
+
+        // Handle sự kiện click vào row để tick vào checkbox
+        $(document).on("click", "#datatab tbody tr td:not(:last-child)", function (e) {
+            var element = $(this).parent()
+            var current = data[element.parent().children().index(element)];
+            //console.log($(this).parent().children());
+            $.each(current, function (k, v) {
+                $("#form").find("#" + k).val(v);
+            });
+
+            $(".modal-footer #createtmp").html("Save");
+            $(".modal-footer #createtmp").attr("onclick", "editElement();");
+            $("#myModal").modal();
+
+        });
+    });
+
+    // SỬa domain
+    function editElement() {
+        $.ajax({
+            type: "POST",
+            url: "../api/save",
+            data: $("#form").serialize(),
+            success: function (data) {
+                if (data == true) {
+                    oTable.ajax.reload();
+                    alert("Save sucess!");
+                    $("#myModal").modal('toggle');
+                } else
+                    alert("Save error!");
+            },
+            error: function () {
+                alert("Save error!")
+            }
+        })
+    }
+
+    // Gọi api thêm domain
+    function createElemet() {
+        //$("#form input:hidden").val("0");
+        $.ajax({
+            type: "PUT",
+            url: "../api/domain",
+            data: $("#form").serialize(),
+            success: function (data) {
+                if (data == true) {
+                    alert("Add sucess!");
+                    $("#myModal").modal('toggle');
+                    oTable.ajax.reload();
+                } else
+                    alert("Add error!");
+            }, error: function () {
+                alert("Add error!");
+            }
+        });
+    }
+
+    // Gọi api xóa phần tử
+    function deleteColum(e) {
+        var id = $(e).parent().parent().children().first().html();
+        $.ajax({
+            type: "DELETE",
+            url: "../api/domain/delete/" + id,
+            success: function (data) {
+                if (data !=null) {
+                    oTable.ajax.reload();
+                    alert("Remove sucess!");
+                } else
+                    alert("Remove error!");
+            },
+            error: function () {
+                alert("Remove error!")
+            }
+        })
+    };
+</script>

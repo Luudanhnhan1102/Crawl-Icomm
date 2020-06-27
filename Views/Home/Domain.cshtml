@@ -1,0 +1,390 @@
+﻿@using Icomm.NewsCrawl.Website.Models
+@{
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+
+<h2>Domain</h2>
+<div class="row" style="margin-bottom:10px">
+    @*<div class="form-check">
+            <label class="form-check-label">
+                <input type="checkbox" class="form-check-input" id="checkConfiged" /> Xem domain chưa thêm danh sách chủ đề
+            </label>
+        </div>*@
+    @*<label class="form-control col-md-3" style="text-align: center;border:0px;"></label>*@
+    <select class="form-control col-md-9" id="Type" name="Type">
+        <option value='0'>Tất cả </option>
+        <option value='1'>Danh sách url chưa thêm vào chủ đề</option>
+        <option value='2'>Danh sách url chưa cấu hình đủ</option>
+    </select>
+</div>
+<div class="row" style="margin-bottom:10px" id="menu">
+    <button type="button" onclick="OpentableCreate();" class="btn btn-primary">Tạo</button>
+    <button type="button" onclick="deleteColum();" class="btn btn-danger ml-auto">Xóa</button>
+</div>
+<div class="row">
+    <div class="alert alert-success" role="alert" style="display: none;">
+        <strong>Thành công!</strong> <text id="alert-success"></text>
+    </div>
+    <div class="alert alert-info" role="alert" style="display: none;">
+        <text id="alert-info"></text>
+    </div>
+    <div class="alert alert-warning" role="alert" style="display: none;">
+        <strong>Cảnh báo!</strong> <text id="alert-warning"></text>
+    </div>
+    <div class="alert alert-danger" role="alert" style="display: none;">
+        <strong>Lỗi!</strong> <text id="alert-danger"></text>
+    </div>
+</div>
+<div class="span12">
+    <table class="table table-hover" id="datatab">
+        <thead>
+            <tr>
+                <th class="checkAll"></th>
+                <th>ID</th>
+                <th>url</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+            <tr>
+                <th class="checkAll"></th>
+                <th>ID</th>
+                <th>url</th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+<!-- Modal -->
+<div class="modal fade " tabindex="-1" id="myModal" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content h-100">
+            <div class="modal-header">
+                <h4 class="modal-title">Cấu hình chi tiết</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid justify-content-center align-items-center">
+                    <form id="form" class="form-horizontal">
+                        <input class="form-control" id="ID" name="ID" type="hidden">
+                        <div class="row">
+                            <label for="url" class="control-label col-md-3">Url</label>
+                            <textarea class="form-control col-md-9 ml-auto" rows="1" id="url" name="url"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="createtmp" class="btn btn-primary mr-auto">Tạo</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade " tabindex="-1" id="modalCatecory" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content h-100">
+            <div class="modal-header">
+                <h4 class="modal-title">Cấu hình chủ đề</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid justify-content-center align-items-center">
+                    <form id="form" class="form-horizontal">
+                        <div class="row">
+                            <label for="module" class="control-label col-md-3">Module</label>
+                            <select class="form-control col-md-9" id="module" name="module">
+                                @foreach (var country in (List<Country>)ViewBag.Country)
+                                {
+                                    <option value='@country.country_code'>@country.country_name_vi</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="row">
+                            <label for="interval" class="control-label col-md-3">Thời gian lập lịch</label>
+                            <select class="form-control col-md-9" id="interval" name="interval">
+                                <option value='900'>15 phút</option>
+                                <option value='1800'>30 phút</option>
+                                <option value='2700'>45 phút</option>
+                                <option value='3600'>1 giờ</option>
+                                <option value='7200'>2 giờ</option>
+                                <option value='10800'>3 giờ</option>
+                                <option value='14400'>4 giờ</option>
+                                <option value='18000'>5 giờ</option>
+                                <option value='21600'>6 giờ</option>
+                                <option value='43200'>12 giờ</option>
+                                <option value='64800'>18 giờ</option>
+                                <option value='86400'>24 giờ</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="pushDataToCategory();" class="btn btn-primary mr-auto">Thêm chủ đề</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var data;
+    var oTable;
+    function checkClickAllInput(e) {
+        if ($(e).is(":checked"))
+            $(".colummDelete:not(':checked')").click();
+        else
+            $(".colummDelete:checked").click();
+    };
+
+    function openConfig() {
+        $("#modalCatecory").modal();
+    }
+
+    function pushDataToCategory() {
+        if ($(".colummDelete:checked").length > 0) {
+            $("#alert-info").html("Đang thêm dữ liệu, vui lòng chờ!");
+            $(".alert-info").show();
+            $("#modalCatecory").modal('toggle');
+            var checkeds = $(".colummDelete:checked").parent().parent();
+            var arr = new Array();
+            for (var i = 0; i < checkeds.length; i++) {
+                arr.push(checkeds[i].children[1].innerHTML);
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "../url/push/list/category",
+                data: {
+                    'result': arr,
+                    'module': $("#module").val(),
+                    'interval': $("#interval").val(),
+                },
+                success: function (data) {
+
+                    if (data != null) {
+                        oTable.ajax.reload();
+                        showAlertSucces(data);
+                    } else {
+                        oTable.ajax.reload();
+                        showAlert("alert-danger", "Thêm thất bại");
+                    }
+                },
+                error: function () {
+                    oTable.ajax.reload();
+                    showAlert("alert-danger", "Mất kết nối hoặc lỗi trong quá trình xử lý!");
+                }
+            });
+        } else
+            showAlert("alert-warning", "Vui lòng chọn ít nhất 1 url để thêm!")
+    };
+
+    //$(".alert-success").fadeTo(3000, 500).slideUp(500, function () {
+    //    $(".alert-success").slideUp(500);
+    //});
+
+    function showAlert(name, message) {
+        $(".alert").hide();
+        $("#" + name).html(message);
+        $("." + name).fadeTo(3000, 500).slideUp(500, function () {
+            $("." + name).slideUp(500);
+        });
+    };
+
+    function showAlertSucces(data) {
+        $(".alert").hide();
+        var name = data.status == 1 ? "alert-success" : "alert-danger";
+        $("#" + name).html(data.result);
+        $("." + name).fadeTo(3000, 500).slideUp(500, function () {
+            $("." + name).slideUp(500);
+        });
+    };
+
+    $("#Type").change(function () {
+        $("#menu").html("");
+        $(".checkAll").html("");
+        oTable.destroy();
+        var value = $(this).val();
+        if (value == '0') {
+            $("#menu").html("<button type=\"button\" onclick=\"OpentableCreate();\" class=\"btn btn-primary\">Tạo</button><button type=\"button\" onclick=\"deleteColum();\" class=\"btn btn-danger ml-auto\">Xóa</button>");
+            createDataTable('../url/data');
+        }
+        else if (value == '1') {
+            $("#menu").html("<button type=\"button\" onclick=\"OpentableCreate();\" class=\"btn btn-primary\">Tạo</button><button type=\"button\" onclick=\"openConfig();\" class=\"btn btn-info ml-auto\">Thêm vào chủ đề</button><button type=\"button\" onclick=\"deleteColum()\" class=\"btn btn-danger ml-auto\">Xóa</button>");
+            createDataTable('../url/data/not/push/to/list');
+            $(".checkAll").html("<input type='checkbox' onclick='checkClickAllInput(this);' class='inputCheckAll'>");
+        }
+        else if (value == '2') {
+            $("#menu").html("<button type=\"button\" onclick=\"OpentableCreate();\" class=\"btn btn-primary\">Tạo</button><button type=\"button\" onclick=\"deleteColum();\" class=\"btn btn-danger ml-auto\">Xóa</button>");
+            createDataTable('../url/data/not/config');
+        }
+    });
+
+    $(document).ready(function () {
+        $('#datatab').on('xhr.dt', function (e, settings, json) {
+            data = json.data;
+            // Note no return - manipulate the data directly in the JSON object.
+        });
+        createDataTable('../url/data');
+
+        $(document).on("click", "#datatab tbody tr td:not(:last-child)", function () {
+            $(this).parent().find(".colummDelete").click();
+        });
+        $(document).on("change", "#datatab tbody tr td input", function () {
+            if ($("#datatab tbody input").length == $("#datatab tbody input:checked").length)
+                $(".inputCheckAll:not(':checked')").prop('checked', true);
+            else
+                $(".inputCheckAll:checked").prop('checked', false);
+
+            if ($(this).is(':checked'))
+                $(this).parent().parent().css('background-color', '#01FF70');
+            else
+                $(this).parent().parent().css('background-color', '');
+        });
+    });
+    // Mở modal thêm phần tử mới
+    function OpentableCreate() {
+        $("#form :input").val("");
+        $("#form #url").attr("rows", "20");
+        $(".modal-footer #createtmp").html("Tạo");
+        $(".modal-footer #createtmp").attr("onclick", "createElemet();");
+        $("#myModal").modal();
+    };
+    // Khở tạo datatable
+    function createDataTable(e) {
+        oTable = $('#datatab').DataTable({
+            "serverSide": true,
+            "ajax": {
+                "type": "POST",
+                "url": e,
+                "contentType": 'application/json; charset=utf-8',
+                'data': function (data) {
+                    return JSON.stringify(data);
+                }
+            },
+            "processing": true,
+            "paging": true,
+            "columns": [
+                {
+                    "data": "Action",
+                    "defaultContent": "<input type='checkbox' class='colummDelete'>",
+                    //"width": "10%",
+                    "orderable": false
+                },
+                { "data": "ID" },
+                { "data": "url" },
+                {
+                    "data": "Action",
+                    "defaultContent": "<button type='button' class='btn btn-warning' onclick='editColum(this);'>Sửa</button>",
+                    "orderable": false
+                }
+            ],
+            "order": [1, "desc"]
+        });
+    };
+
+    // GỌi api sửa phần tử
+    function editElement() {
+        $.ajax({
+            type: "POST",
+            url: "../url/update",
+            data: $("#form").serialize(),
+            success: function (data) {
+                if (data != null) {
+                    oTable.ajax.reload();
+                    showAlertSucces(data);
+                    $("#myModal").modal('toggle');
+                } else
+                    showAlert("alert-danger", "Lỗi");
+            },
+            error: function () {
+                showAlert("alert-danger", "Mất kết nối!")
+            }
+        })
+    }
+
+    //Hàm bắt sự kiện click vào nút sửa. Thêm dữ liệu dòng được chọn vào modal và mở modal
+    function editColum(e) {
+        var element = $(e).parent().parent();
+        console.log($(e).parent().parent());
+        var current = data[element.parent().children().index(element)];
+        $.each(current, function (k, v) {
+            $("#form").find("#" + k).val(v);
+        });
+
+        $(".modal-footer #createtmp").html("Cập nhật");
+        $(".modal-footer #createtmp").attr("onclick", "editElement();");
+        $("#myModal").modal();
+    }
+
+    // Gọi api thêm phần tử
+    function createElemet() {
+        $.ajax({
+            type: "PUT",
+            url: "../url/add",
+            data: $("#form").serialize(),
+            success: function (data) {
+                if (data != null) {
+                    oTable.ajax.reload();
+                    showAlertSucces(data);
+                    $("#myModal").modal('toggle');
+                } else
+                    showAlert("alert-danger", "Lỗi trong quá trình xử lý!");
+            }, error: function () {
+                showAlert("alert-danger", "Mất kết nối hoặc lỗi trong quá trình xử lý!");
+            }
+        });
+    }
+
+    // GỌi api xóa phần tử
+    function deleteColum() {
+        if ($(".colummDelete:checked").length > 0) {
+            if (confirm('Bạn có chắc chắn xóa những url này?')) {
+                var checkeds = $(".colummDelete:checked").parent().parent();
+                var arr = new Array();
+                for (var i = 0; i < checkeds.length; i++) {
+                    arr.push(checkeds[i].children[1].innerHTML);
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "../url/delete",
+                    data: {
+                        'result': arr
+                    },
+                    success: function (data) {
+                        if (data != null) {
+                            oTable.ajax.reload();
+                            showAlertSucces(data);
+                        } else {
+                            oTable.ajax.reload();
+                            showAlert("alert-danger", "Xóa thất bại");
+                        }
+                    },
+                    error: function () {
+                        oTable.ajax.reload();
+                        showAlert("alert-danger", "Mất kết nối hoặc lỗi trong quá trình xử lý!");
+                    }
+                })
+            }
+        } else
+            showAlert("alert-warning", "Vui lòng chọn ít nhất 1 url để xóa!");
+    };
+
+    setInterval(function () {
+        console.log($(".colummDelete:checked").length)
+        if ($(".colummDelete:checked").length == 0)
+            oTable.ajax.reload(null, false);
+    }, 3000);
+</script>

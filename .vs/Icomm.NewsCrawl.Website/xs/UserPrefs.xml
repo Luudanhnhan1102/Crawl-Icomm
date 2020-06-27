@@ -1,0 +1,42 @@
+﻿<Properties StartupConfiguration="{92156267-5071-4744-9530-7CFDF7A0163E}|Default">
+  <MonoDevelop.Ide.ItemProperties.Icomm.NewsCrawl.Website PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="wwwroot/Scripts/generator.js">
+    <Files>
+      <File FileName="appsettings.Development.json" Line="12" Column="4" />
+      <File FileName="Controllers/ConfigController.cs" />
+      <File FileName="Startup.cs" />
+      <File FileName="Controllers/DomainController.cs" />
+      <File FileName="Controllers/HomeController.cs" Line="208" Column="82" />
+      <File FileName="wwwroot/Scripts/generator.js" Line="779" Column="51" />
+      <File FileName="Views/Home/Crawl.cshtml" Line="284" Column="37" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Icomm.NewsCrawl.Website" expanded="True">
+            <Node name="Icomm.NewsCrawl.Website" expanded="True">
+              <Node name="Controllers" expanded="True" />
+              <Node name="Views" expanded="True">
+                <Node name="Home" expanded="True" />
+              </Node>
+              <Node name="wwwroot" expanded="True">
+                <Node name="Scripts" expanded="True">
+                  <Node name="generator.js" selected="True" />
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/admin/Downloads/Icomm.NewsCrawl.Website/Controllers/DomainController.cs" relfile="Controllers/DomainController.cs" line="76" column="1" />
+      <Breakpoint file="/Users/admin/Downloads/Icomm.NewsCrawl.Website/Controllers/DomainController.cs" relfile="Controllers/DomainController.cs" line="41" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
